@@ -1,5 +1,10 @@
 import Image from "next/image";
+import Register from "./register";
 
-export default function Home() {
-  return <main className="">momo</main>;
+export default function App() {
+  return (
+    <main>
+      <Register />
+    </main>
+  );
 }
