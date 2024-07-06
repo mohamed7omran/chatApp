@@ -6,20 +6,33 @@ import { UserContext } from "./userContext";
 const Register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { setUsername: setLoggedInUsername, setId } = useContext(UserContext);
+  // const { setUsername: setLoggedInUsername, setId } = useContext(UserContext);
   const register = async (event) => {
     event.preventDefault();
-    const respons = await axios.get("http://localhost:8000/register");
-    const users = respons;
-    console.log(users);
-    //   const { data } = await axios
-    //     .post("http://localhost:8000/register", { username, password })
-    //     .then(function (response) {
-    //       console.log(response);
-    //     })
-    //     .catch(console.log("Failed to register"));
-    //   setLoggedInUsername(username);
-    //   setId(data.id);
+    // !====
+    // const { data } = await axios.get(
+    //   "http://localhost:8000/register/668950d979ed313e33b259f4"
+    // );
+    // console.log(data.password);
+    // !=====
+    // await axios
+    // .post("http://localhost:8000/register", {
+    //   username: username,
+    //   password: password,
+    // })
+    // .then((response) => {
+    //   console.log(response.data);
+    // });
+    // !=====
+    // const { data } = await axios
+    //   .post("http://localhost:8000/register", { username, password })
+    //   .then( (response)=> {
+    //     console.log(response);
+    //   })
+    //   .catch(console.log("Failed to register"));
+    // setLoggedInUsername(username);
+    // setId(data.id);
+    // !======
   };
   return (
     <div className="bg-blue-50 h-screen flex items-center ">

@@ -30,6 +30,11 @@ app.get("/register", async (req, res) => {
   const user = await User.find();
   res.json(user);
 });
+app.get("/register/:userId", async (req, res) => {
+  const id = req.params.userId;
+  const user = await User.findById(id);
+  res.json(user);
+});
 
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
