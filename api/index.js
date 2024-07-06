@@ -19,12 +19,12 @@ const app = express();
 app.use(express.json());
 
 // !new
-// app.use(
-//   cors({
-//     credentials: true,
-//     origin: process.env.CLIENT_URL,
-//   })
-// );
+app.use(
+  cors({
+    credentials: true,
+    origin: process.env.CLIENT_URL,
+  })
+);
 
 app.get("/register", async (req, res) => {
   const user = await User.find();

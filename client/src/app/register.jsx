@@ -9,14 +9,17 @@ const Register = () => {
   const { setUsername: setLoggedInUsername, setId } = useContext(UserContext);
   const register = async (event) => {
     event.preventDefault();
-    const { data } = await axios
-      .post("http://localhost:8000/register", { username, password })
-      .then(function (response) {
-        console.log(response);
-      })
-      .catch(console.log("Failed to register"));
-    setLoggedInUsername(username);
-    setId(data.id);
+    const respons = await axios.get("http://localhost:8000/register");
+    const users = respons;
+    console.log(users);
+    //   const { data } = await axios
+    //     .post("http://localhost:8000/register", { username, password })
+    //     .then(function (response) {
+    //       console.log(response);
+    //     })
+    //     .catch(console.log("Failed to register"));
+    //   setLoggedInUsername(username);
+    //   setId(data.id);
   };
   return (
     <div className="bg-blue-50 h-screen flex items-center ">

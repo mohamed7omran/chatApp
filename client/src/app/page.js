@@ -1,6 +1,7 @@
 import axios from "axios";
 import { UserContextProvider } from "./userContext";
 import Routes from "./routes";
+import Register from "./register";
 
 export default function App() {
   // !new
@@ -8,8 +9,9 @@ export default function App() {
   axios.defaults.withCredentials = true;
 
   return (
-    <UserContextProvider>
-      <Routes />
-    </UserContextProvider>
+    // <UserContextProvider>
+    //   <Routes />
+    // </UserContextProvider>
+    <Register></Register>
   );
 }
