@@ -1,10 +1,15 @@
-import Image from "next/image";
-import Register from "./register";
+import axios from "axios";
+import { UserContextProvider } from "./userContext";
+import Routes from "./routes";
 
 export default function App() {
+  // !new
+  axios.defaults.baseURL = "http://localhost:8000";
+  axios.defaults.withCredentials = true;
+
   return (
-    <main>
-      <Register />
-    </main>
+    <UserContextProvider>
+      <Routes />
+    </UserContextProvider>
   );
 }
