@@ -24,8 +24,8 @@ const Register = () => {
 
   const registerration = async (event) => {
     const { data } = await axios.post("http://localhost:8000/register", {
-      username,
-      password,
+      username: username,
+      password: password,
     });
     setLoggedInUsername(username);
     setId(data.id);

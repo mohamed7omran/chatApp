@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const User = require("./models/user");
+const cookieParser = require("cookie-parser");
 
 dotenv.config();
 mongoose.connect(process.env.MONGO_URL);
@@ -18,6 +19,7 @@ const jwtSecret = process.env.JWT_SECRET;
 const app = express();
 app.use(express.json());
 
+app.use(cookieParser());
 // !new => for connected whit frontend
 app.use(
   cors({
@@ -30,17 +32,31 @@ app.get("/test", async (req, res) => {
   res.json("test ok");
 });
 
-//! new
+app.get("/profile", async (req, res) => {
+  const token = req.cookies?.token;
+  if (token) {
+    // !new return id and username
+    jwt.verify(token, jwtSecret, {}, (err, userData) => {
+      if (err) throw err;
+      res.json(userData);
+    });
+  } else {
+    res.status(401).json("no token");
+  }
+});
+
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
   try {
     console.log("successfully post registration");
     const createdUser = await User.create({ username, password });
-    jwt.sign({ userId: createdUser }, jwtSecret, {}, (err, token) => {
+    // !nwe why mongodb id
+    jwt.sign({ userId: createdUser._id }, jwtSecret, {}, (err, token) => {
       if (err) throw err;
 
       res.cookie("token", token).status(201).json({
         id: createdUser._id,
+        username,
       });
     });
   } catch (err) {
