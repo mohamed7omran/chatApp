@@ -18,7 +18,7 @@ const jwtSecret = process.env.JWT_SECRET;
 
 const app = express();
 app.use(express.json());
-
+// !new
 app.use(cookieParser());
 // !new => for connected whit frontend
 app.use(
@@ -45,20 +45,28 @@ app.get("/profile", async (req, res) => {
   }
 });
 
+app.post("/login", (req, res) => {
+  const { username, password } = req.body;
+});
+
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
   try {
     console.log("successfully post registration");
     const createdUser = await User.create({ username, password });
     // !nwe why mongodb id
-    jwt.sign({ userId: createdUser._id }, jwtSecret, {}, (err, token) => {
-      if (err) throw err;
+    jwt.sign(
+      { userId: createdUser._id, username },
+      jwtSecret,
+      {},
+      (err, token) => {
+        if (err) throw err;
 
-      res.cookie("token", token).status(201).json({
-        id: createdUser._id,
-        username,
-      });
-    });
+        res.cookie("token", token).status(201).json({
+          id: createdUser._id,
+        });
+      }
+    );
   } catch (err) {
     if (err) throw err;
     res.status(500).json("error");
