@@ -1,9 +1,9 @@
 "use client";
 import axios from "axios";
 import React, { useContext, useState } from "react";
-import { UserContext } from "./userContext";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
+import { UserContext } from "./page";
 
 const Register = () => {
   const {
@@ -11,47 +11,31 @@ const Register = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const { setUsername: setLoggedInUsername, setId } = useContext(UserContext);
+  const onSubmit = (data, event) => {
+    event.preventDefault();
+    setUsername(data.username);
+    setPassword(data.password);
+    registerration();
+  };
 
-  const onSubmit = (data) => console.log(data);
-
-  // !====
-  // const { setUsername: setLoggedInUsername, setId } = useContext(UserContext);
-  // const registerration = async (event) => {
-  // event.preventDefault();
-  // !====
-  // const { data } = await axios.get(
-  //   "http://localhost:8000/register/668950d979ed313e33b259f4"
-  // );
-  // console.log(data.password);
-
-  // !=====
-  // await axios
-  // .post("http://localhost:8000/register", {
-  //   username: username,
-  //   password: password,
-  // })
-  // .then((response) => {
-  //   console.log(response.data);
-  // });
-  // !=====
-  // const { data } = await axios
-  //   .post("http://localhost:8000/register", { username, password })
-  //   .then( (response)=> {
-  //     console.log(response);
-  //   })
-  //   .catch(console.log("Failed to register"));
-  // setLoggedInUsername(username);
-  // setId(data.id);
-  // !======
-  // };
+  const registerration = async (event) => {
+    const { data } = await axios.post("http://localhost:8000/register", {
+      username,
+      password,
+    });
+    setLoggedInUsername(username);
+    setId(data.id);
+  };
   return (
     <div className="bg-blue-50 h-screen flex items-center ">
       <form className="w-64  mx-auto mb-12" onSubmit={handleSubmit(onSubmit)}>
         <input
           // value={username}
-          onChange={(event) => setUsername(event.target.value)}
+          // onChange={(event) => setUsername(event.target.value)}
           type="text"
           {...register("username", { required: "This is required." })}
           placeholder="Username"
@@ -66,7 +50,7 @@ const Register = () => {
         />
         <input
           // value={password}
-          onChange={(event) => setPassword(event.target.value)}
+          // onChange={(event) => setPassword(event.target.value)}
           type="password"
           {...register("password", { required: "This is required." })}
           placeholder="Password"
@@ -92,3 +76,20 @@ const Register = () => {
 };
 
 export default Register;
+// !====
+// const { data } = await axios.get(
+//   "http://localhost:8000/register/668950d979ed313e33b259f4"
+// );
+// console.log(data.password);
+
+// !=====
+// !=====
+// const { data } = await axios
+//   .post("http://localhost:8000/register", { username, password })
+//   .then( (response)=> {
+//     console.log(response);
+//   })
+//   .catch(console.log("Failed to register"));
+// setLoggedInUsername(username);
+// setId(data.id);
+// !======

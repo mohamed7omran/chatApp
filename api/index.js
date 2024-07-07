@@ -13,7 +13,7 @@ mongoose.connection.on("connected", () => {
 mongoose.connection.on("error", (err) => {
   console.error(`failed to connected to database : ${err}`);
 });
-// const jwtSecret = process.env.JWT_SECRET;
+const jwtSecret = process.env.JWT_SECRET;
 
 const app = express();
 app.use(express.json());
@@ -26,50 +26,58 @@ app.use(
   })
 );
 
+app.get("/test", async (req, res) => {
+  res.json("test ok");
+});
+
+//! new
+app.post("/register", async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    console.log("successfully post registration");
+    const createdUser = await User.create({ username, password });
+    jwt.sign({ userId: createdUser }, jwtSecret, {}, (err, token) => {
+      if (err) throw err;
+
+      res.cookie("token", token).status(201).json({
+        id: createdUser._id,
+      });
+    });
+  } catch (err) {
+    if (err) throw err;
+    res.status(500).json("error");
+  }
+});
+
+app.listen(8000, () => {
+  console.log("i'am listen ,port 8000");
+});
+
+// !my post
+// app.post("/register", async (req, res) => {
+//   const { username, password } = req.body;
+//   try {
+//     const createdUser = await User.create({ username, password }).then((user) =>
+//       res.status(200).json({
+//         message: "User successfully created",
+//         user,
+//       })
+//     );
+//   } catch (err) {
+//     res.status(401).json({
+//       message: "User not successful created",
+//     });
+//   }
+// createdUser.save();
+// });
+
 // app.get("/register", async (req, res) => {
 //   const user = await User.find();
 //   res.json(user);
 // });
+
 // app.get("/register/:userId", async (req, res) => {
 //   const id = req.params.userId;
 //   const user = await User.findById(id);
 //   res.json(user);
 // });
-
-app.post("/register", async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const createdUser = await User.create({ username, password }).then((user) =>
-      res.status(200).json({
-        message: "User successfully created",
-        user,
-      })
-    );
-  } catch (err) {
-    res.status(401).json({
-      message: "User not successful created",
-    });
-  }
-  // createdUser.save();
-});
-//! new
-// app.post("/register", async (req, res) => {
-//   const { username, password } = req.body;
-//   try {
-//     console.log("username");
-//     const createdUser = await User.create({ username, password });
-//     jwt.sign({ userId: createdUser, id }, jwtSecret, {}, (err, token) => {
-//       if (err) throw err;
-//       res.cookie("token", token).status(201).json({
-//         id: createdUser._id,
-//       });
-//     });
-//   } catch (err) {
-//     if (err) throw err;
-//     res.status(500).json("error");
-//   }
-// });
-
-app.listen(8000, () => {
-  console.log("i'am listen ,port 8000");
-});
