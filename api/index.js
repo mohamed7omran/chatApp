@@ -109,8 +109,23 @@ wss.on("connection", (connection, req) => {
     if (tokenCookieString) {
       const token = tokenCookieString.split("=")[1];
       if (token) {
-        console.log(token);
+        jwt.verify(token, jwtSecret, {}, (err, userData) => {
+          if (err) throw err;
+          const { userId, username } = userData;
+          connection.userId = userId;
+          connection.username = username;
+        });
       }
     }
   }
+  [...wss.clients].forEach((client) => {
+    client.send(
+      JSON.stringify(
+        [...wss.clients].map((client) => ({
+          userId: client.userId,
+          username: client.username,
+        }))
+      )
+    );
+  });
 });
