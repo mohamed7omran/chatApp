@@ -7,9 +7,17 @@ const Chat = () => {
     setWs(ws);
     ws.addEventListener("message", handlMessage);
   }, []);
-  const handlMessage = (e) => {
-    console.log("new Message", e);
+
+  const showOnlinePeopleif = (people) => {
+    console.log(people);
   };
+  const handlMessage = (ev) => {
+    const messageData = JSON.parse(ev.data);
+    if ("online" in messageData) {
+      showOnlinePeopleif(messageData.online);
+    }
+  };
+
   return (
     <div className="flex h-screen">
       <div className="bg-white w-1/3">contents</div>
