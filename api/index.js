@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const User = require("./models/user");
 const cookieParser = require("cookie-parser");
+const ws = require("ws");
 const bcrypt = require("bcryptjs");
 
 dotenv.config();
@@ -95,35 +96,21 @@ app.post("/register", async (req, res) => {
   }
 });
 
-app.listen(8000, () => {
+const server = app.listen(8000, () => {
   console.log("i'am listen ,port 8000");
 });
-
-// !my post
-// app.post("/register", async (req, res) => {
-//   const { username, password } = req.body;
-//   try {
-//     const createdUser = await User.create({ username, password }).then((user) =>
-//       res.status(200).json({
-//         message: "User successfully created",
-//         user,
-//       })
-//     );
-//   } catch (err) {
-//     res.status(401).json({
-//       message: "User not successful created",
-//     });
-//   }
-// createdUser.save();
-// });
-
-// app.get("/register", async (req, res) => {
-//   const user = await User.find();
-//   res.json(user);
-// });
-
-// app.get("/register/:userId", async (req, res) => {
-//   const id = req.params.userId;
-//   const user = await User.findById(id);
-//   res.json(user);
-// });
+const wss = new ws.WebSocketServer({ server });
+wss.on("connection", (connection, req) => {
+  const cookies = req.headers.cookie;
+  if (cookies) {
+    const tokenCookieString = cookies
+      .split(";")
+      .find((str) => str.startsWith("token="));
+    if (tokenCookieString) {
+      const token = tokenCookieString.split("=")[1];
+      if (token) {
+        console.log(token);
+      }
+    }
+  }
+});
