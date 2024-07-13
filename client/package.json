@@ -17,6 +17,7 @@
     "react-hook-form": "^7.52.1"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "eslint": "^8",
     "eslint-config-next": "14.2.4",
     "postcss": "^8",

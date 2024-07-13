@@ -4,7 +4,6 @@ import React, { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import { UserContext } from "./page";
-import Link from "next/link";
 
 const RegisterAndLogin = () => {
   const {
@@ -26,7 +25,7 @@ const RegisterAndLogin = () => {
       username,
       password,
     });
-    console.log(data);
+    console.log("data is ", data);
     setLoggedInUsername(username);
     setId(data.id);
   };

@@ -110,20 +110,28 @@ wss.on("connection", (connection, req) => {
       const token = tokenCookieString.split("=")[1];
       if (token) {
         jwt.verify(token, jwtSecret, {}, (err, userData) => {
-          if (err) throw err;
+          if (err) {
+            console.error("JWT verification error:", err);
+            return;
+          }
+
           const { userId, username } = userData;
           connection.userId = userId;
           connection.username = username;
+
+          // console.log("User connected with username:", username);
         });
       }
     }
   }
+  // console.log([...wss.clients].map((client) => client.username));
+
   [...wss.clients].forEach((client) => {
     client.send(
       JSON.stringify({
-        online: [...wss.clients].map((client) => ({
-          userId: client.userId,
-          username: client.username,
+        online: [...wss.clients].map((c) => ({
+          userId: c.userId,
+          username: c.username,
         })),
       })
     );
