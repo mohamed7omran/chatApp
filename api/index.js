@@ -99,8 +99,11 @@ app.post("/register", async (req, res) => {
 const server = app.listen(8000, () => {
   console.log("i'am listen ,port 8000");
 });
+
 const wss = new ws.WebSocketServer({ server });
+
 wss.on("connection", (connection, req) => {
+  // red username and id from the cookie for this connection
   const cookies = req.headers.cookie;
   if (cookies) {
     const tokenCookieString = cookies
@@ -114,18 +117,25 @@ wss.on("connection", (connection, req) => {
             console.error("JWT verification error:", err);
             return;
           }
-
           const { userId, username } = userData;
           connection.userId = userId;
           connection.username = username;
-
-          // console.log("User connected with username:", username);
         });
       }
     }
   }
-  // console.log([...wss.clients].map((client) => client.username));
 
+  connection.on("message", (message) => {
+    const messageData = JSON.parse(message.toString());
+    const { recipient, text } = messageData;
+    if (recipient && text) {
+      [...wss.clients]
+        .filter((c) => c.userId === recipient)
+        .forEach((c) => connection.send(JSON.stringify({ text })));
+    }
+  });
+
+  // notify everyone about online people (when someone connects)
   [...wss.clients].forEach((client) => {
     client.send(
       JSON.stringify({
