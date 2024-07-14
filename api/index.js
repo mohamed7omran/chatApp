@@ -1,12 +1,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
-const User = require("./models/user");
-const cookieParser = require("cookie-parser");
-const ws = require("ws");
 const bcrypt = require("bcryptjs");
+const User = require("./models/user");
+const Message = require("./models/message");
+const ws = require("ws");
 
 dotenv.config();
 mongoose.connect(process.env.MONGO_URL);
@@ -125,13 +126,26 @@ wss.on("connection", (connection, req) => {
     }
   }
 
-  connection.on("message", (message) => {
+  connection.on("message", async (message) => {
     const messageData = JSON.parse(message.toString());
     const { recipient, text } = messageData;
     if (recipient && text) {
+      const messageDoc = await Message.create({
+        sender: connection.userId,
+        recipient,
+        text,
+      });
       [...wss.clients]
         .filter((c) => c.userId === recipient)
-        .forEach((c) => connection.send(JSON.stringify({ text })));
+        .forEach((c) =>
+          c.send(
+            JSON.stringify({
+              text,
+              sender: connection.username,
+              id: messageDoc._id,
+            })
+          )
+        );
     }
   });
 

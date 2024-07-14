@@ -27,10 +27,14 @@ const Chat = () => {
   };
   const handleMessage = (ev) => {
     const messageData = JSON.parse(ev.data);
+    console.log({ ev, messageData });
     if ("online" in messageData) {
       showOnlinePeople(messageData.online);
-    } else {
-      console.log(messageData);
+    } else if ("text" in messageData) {
+      setMessages((prev) => [
+        ...prev,
+        { isOur: false, text: messageData.text },
+      ]);
     }
   };
   const sendMessage = (ev) => {
@@ -42,9 +46,12 @@ const Chat = () => {
       })
     );
     setNewMessageText("");
+    setMessages((prev) => [...prev, { text: newMessageText, isOur: true }]);
   };
   const onlinePeopleExclOuerUser = { ...onlinePeople };
   delete onlinePeopleExclOuerUser[id];
+
+  const messageWithoutDupes = messages;
   return (
     <div className="flex h-screen">
       <div className="bg-white w-1/3 ">
@@ -75,6 +82,13 @@ const Chat = () => {
               <div className="text-gray-300">
                 &larr; selected a person the sidebar
               </div>
+            </div>
+          )}
+          {!!selectedUserId && (
+            <div>
+              {messages.map((message, id) => (
+                <div key={id}>{message.text}</div>
+              ))}
             </div>
           )}
         </div>
