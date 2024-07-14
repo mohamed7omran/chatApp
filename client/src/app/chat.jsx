@@ -1,8 +1,9 @@
 "use client";
-import React, { useEffect, useId, useState, useContext } from "react";
+import React, { useEffect, useId, useState, useContext, useRef } from "react";
 import Avatar from "./avatar";
 import Logo from "./logo";
 import { UserContext } from "./page";
+import { uniqBy } from "lodash";
 
 const Chat = () => {
   const [ws, setWs] = useState();
@@ -11,7 +12,7 @@ const Chat = () => {
   const [newMessageText, setNewMessageText] = useState("");
   const [messages, setMessages] = useState([]);
   const { username, id } = useContext(UserContext);
-
+  const divUnderMessages = useRef();
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8000");
     setWs(ws);
@@ -31,10 +32,7 @@ const Chat = () => {
     if ("online" in messageData) {
       showOnlinePeople(messageData.online);
     } else if ("text" in messageData) {
-      setMessages((prev) => [
-        ...prev,
-        { isOur: false, text: messageData.text },
-      ]);
+      setMessages((prev) => [...prev, { ...messageData }]);
     }
   };
   const sendMessage = (ev) => {
@@ -46,29 +44,40 @@ const Chat = () => {
       })
     );
     setNewMessageText("");
-    setMessages((prev) => [...prev, { text: newMessageText, isOur: true }]);
+    setMessages((prev) => [
+      ...prev,
+      {
+        text: newMessageText,
+        sender: id,
+        recipient: selectedUserId,
+        id: Date.now(),
+      },
+    ]);
+    const div = divUnderMessages.current;
+    console.log(div);
+    div.scrollIntoView({ behavior: "smooth", block: "end" });
   };
-  const onlinePeopleExclOuerUser = { ...onlinePeople };
-  delete onlinePeopleExclOuerUser[id];
+  const onlinePeopleExclOurUser = { ...onlinePeople };
+  delete onlinePeopleExclOurUser[id];
 
-  const messageWithoutDupes = messages;
+  const messageWithoutDupes = uniqBy(messages, "id");
   return (
     <div className="flex h-screen">
       <div className="bg-white w-1/3 ">
         <Logo />
-        {Object.keys(onlinePeopleExclOuerUser).map((userId) => (
+        {Object.keys(onlinePeopleExclOurUser).map((userId) => (
           <div
             key={userId}
             onClick={() => setSelectedUserId(userId)}
             className={
               "border-b border-gray-100 flex items-center gap-2 cursor-pointer " +
-              (userId === selectedUserId ? "bg-blue-50" : "")
+              (userId === selectedUserId ? " bg-blue-50" : "")
             }
           >
             {userId === selectedUserId && (
               <div className="w-1 bg-blue-800 h-12 rounded-r-md "></div>
             )}
-            <div className="flex gap-2 py-2 pl-4 items-center">
+            <div className="flex gap-2 py-2 pl-4 items-center ">
               <Avatar username={onlinePeople[userId]} userId={useId} />
               <span className="text-gray-800">{onlinePeople[userId]}</span>
             </div>
@@ -85,10 +94,28 @@ const Chat = () => {
             </div>
           )}
           {!!selectedUserId && (
-            <div>
-              {messages.map((message, id) => (
-                <div key={id}>{message.text}</div>
-              ))}
+            <div className="relative h-full">
+              <div className="overflow-y-scroll absolute inset-0">
+                {messageWithoutDupes.map((message) => (
+                  <div
+                    className={
+                      message.sender === id ? " text-right" : " text-left"
+                    }
+                  >
+                    <div
+                      className={
+                        "text-left inline-block p-2 my-2 rounded-md text-sm " +
+                        (message.sender === id
+                          ? " bg-blue-500 text-white"
+                          : " bg-white text-gray-500")
+                      }
+                    >
+                      {message.text}
+                    </div>
+                  </div>
+                ))}
+                <div ref={divUnderMessages}></div>
+              </div>
             </div>
           )}
         </div>
