@@ -4,6 +4,7 @@ import Avatar from "./avatar";
 import Logo from "./logo";
 import { UserContext } from "./page";
 import { uniqBy } from "lodash";
+import axios from "axios";
 
 const Chat = () => {
   const [ws, setWs] = useState();
@@ -14,11 +15,19 @@ const Chat = () => {
   const { username, id } = useContext(UserContext);
   const divUnderMessages = useRef();
   useEffect(() => {
+    connectToWs();
+  }, []);
+  function connectToWs() {
     const ws = new WebSocket("ws://localhost:8000");
     setWs(ws);
     ws.addEventListener("message", handleMessage);
-  }, []);
-
+    ws.addEventListener("close", () => {
+      setTimeout(() => {
+        console.log("disconnect. trying to reconnect");
+        connectToWs();
+      });
+    });
+  }
   const showOnlinePeople = (peopleArray) => {
     const people = {};
     peopleArray.forEach(({ userId, username }) => {
@@ -50,17 +59,28 @@ const Chat = () => {
         text: newMessageText,
         sender: id,
         recipient: selectedUserId,
-        id: Date.now(),
+        _id: Date.now(),
       },
     ]);
-    const div = divUnderMessages.current;
-    console.log(div);
-    div.scrollIntoView({ behavior: "smooth", block: "end" });
   };
+  useEffect(() => {
+    const div = divUnderMessages.current;
+    if (div) {
+      div.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+  }, [messages]);
+  useEffect(() => {
+    if (selectedUserId) {
+      axios.get("/messages/" + selectedUserId).then((res) => {
+        setMessages(res.data);
+        console.log(res.data);
+      });
+    }
+  }, [selectedUserId]);
   const onlinePeopleExclOurUser = { ...onlinePeople };
   delete onlinePeopleExclOurUser[id];
 
-  const messageWithoutDupes = uniqBy(messages, "id");
+  const messageWithoutDupes = uniqBy(messages, "_id");
   return (
     <div className="flex h-screen">
       <div className="bg-white w-1/3 ">
@@ -98,6 +118,7 @@ const Chat = () => {
               <div className="overflow-y-scroll absolute inset-0">
                 {messageWithoutDupes.map((message) => (
                   <div
+                    key={message._id}
                     className={
                       message.sender === id ? " text-right" : " text-left"
                     }
