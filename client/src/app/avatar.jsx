@@ -1,4 +1,4 @@
-const Avatar = ({ userId, username }) => {
+const Avatar = ({ userId, username, online }) => {
   // Array of background colors
   const colors = [
     "bg-red-200",
@@ -20,8 +20,13 @@ const Avatar = ({ userId, username }) => {
 
   // Return JSX for the Avatar component
   return (
-    <div className={"w-8 h-8 rounded-full flex items-center " + color}>
-      <div className="w-full text-center opacity-70">{username[0]}</div>
+    <div
+      className={" relative w-8 h-8 rounded-full flex items-center " + color}
+    >
+      <div className=" w-full text-center opacity-70">{username[0]}</div>
+      {online && (
+        <div className="rounded-full absolute bg-green-400 h-3 w-3 bottom-0 right-0 border border-white"></div>
+      )}
     </div>
   );
 };

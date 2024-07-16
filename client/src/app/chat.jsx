@@ -8,7 +8,8 @@ import axios from "axios";
 
 const Chat = () => {
   const [ws, setWs] = useState();
-  const [onlinePeople, setOnlinePeople] = useState([]);
+  const [onlinePeople, setOnlinePeople] = useState({});
+  const [offlinePeople, setOfflinePeople] = useState({});
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [newMessageText, setNewMessageText] = useState("");
   const [messages, setMessages] = useState([]);
@@ -69,6 +70,21 @@ const Chat = () => {
       div.scrollIntoView({ behavior: "smooth", block: "end" });
     }
   }, [messages]);
+
+  useEffect(() => {
+    axios.get("/people").then((res) => {
+      const offlinePeopleArr = res.data
+        .filter((p) => p._id !== id)
+        .filter((p) => !Object.keys(onlinePeople).includes(p._id));
+      const offlinePeople = {};
+      offlinePeopleArr.forEach((p) => {
+        offlinePeople[p._id] = p;
+      });
+      setOfflinePeople(offlinePeople);
+      console.log(offlinePeople);
+    });
+  }, [onlinePeople]);
+
   useEffect(() => {
     if (selectedUserId) {
       axios.get("/messages/" + selectedUserId).then((res) => {
@@ -98,7 +114,11 @@ const Chat = () => {
               <div className="w-1 bg-blue-800 h-12 rounded-r-md "></div>
             )}
             <div className="flex gap-2 py-2 pl-4 items-center ">
-              <Avatar username={onlinePeople[userId]} userId={useId} />
+              <Avatar
+                online={true}
+                username={onlinePeople[userId]}
+                userId={useId}
+              />
               <span className="text-gray-800">{onlinePeople[userId]}</span>
             </div>
           </div>
