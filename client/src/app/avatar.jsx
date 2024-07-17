@@ -27,6 +27,9 @@ const Avatar = ({ userId, username, online }) => {
       {online && (
         <div className="rounded-full absolute bg-green-400 h-3 w-3 bottom-0 right-0 border border-white"></div>
       )}
+      {!online && (
+        <div className="rounded-full absolute bg-gray-400 h-3 w-3 bottom-0 right-0 border border-white"></div>
+      )}
     </div>
   );
 };

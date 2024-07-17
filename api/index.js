@@ -8,7 +8,7 @@ const bcrypt = require("bcryptjs");
 const User = require("./models/user");
 const Message = require("./models/message");
 const ws = require("ws");
-
+const fileSystem = require("fs");
 dotenv.config();
 mongoose.connect(process.env.MONGO_URL);
 mongoose.connection.on("connected", () => {
@@ -99,6 +99,10 @@ app.post("/login", async (req, res) => {
   }
 });
 
+app.post("/logout", async (req, res) => {
+  res.cookie("token", "").json("Ok");
+});
+
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -134,6 +138,35 @@ const server = app.listen(8000, () => {
 const wss = new ws.WebSocketServer({ server });
 
 wss.on("connection", (connection, req) => {
+  function notifyAboutOnlinePeople() {
+    [...wss.clients].forEach((client) => {
+      client.send(
+        JSON.stringify({
+          online: [...wss.clients].map((c) => ({
+            userId: c.userId,
+            username: c.username,
+          })),
+        })
+      );
+    });
+  }
+  // !new
+  connection.isAlive = true;
+  connection.timer = setInterval(() => {
+    connection.ping();
+    connection.deathTimer = setTimeout(() => {
+      connection.isAlive = false;
+      clearInterval(connection.timer);
+      connection.terminate();
+      notifyAboutOnlinePeople();
+      console.log("dead");
+    }, 1000);
+  }, 5000);
+  connection.on("pong", () => {
+    console.log("d");
+    clearTimeout(connection.deathTimer);
+  });
+
   // red username and id from the cookie for this connection
   const cookies = req.headers.cookie;
   if (cookies) {
@@ -158,7 +191,9 @@ wss.on("connection", (connection, req) => {
 
   connection.on("message", async (message) => {
     const messageData = JSON.parse(message.toString());
-    const { recipient, text } = messageData;
+    const { recipient, text, file } = messageData;
+    if (file) {
+    }
     if (recipient && text) {
       const messageDoc = await Message.create({
         sender: connection.userId,
@@ -181,14 +216,5 @@ wss.on("connection", (connection, req) => {
   });
 
   // notify everyone about online people (when someone connects)
-  [...wss.clients].forEach((client) => {
-    client.send(
-      JSON.stringify({
-        online: [...wss.clients].map((c) => ({
-          userId: c.userId,
-          username: c.username,
-        })),
-      })
-    );
-  });
+  notifyAboutOnlinePeople();
 });
