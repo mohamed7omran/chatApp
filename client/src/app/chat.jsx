@@ -37,7 +37,9 @@ const Chat = () => {
     if ("online" in messageData) {
       showOnlinePeople(messageData.online);
     } else if ("text" in messageData) {
-      setMessages((prev) => [...prev, { ...messageData }]);
+      if (messageData.sender === selectedUserId) {
+        setMessages((prev) => [...prev, { ...messageData }]);
+      }
     }
   };
 
@@ -59,29 +61,29 @@ const Chat = () => {
 
   const sendMessage = (ev, file = null) => {
     if (ev) ev.preventDefault();
-    if (ws) {
-      ws.send(
-        JSON.stringify({
-          recipient: selectedUserId,
-          text: newMessageText,
-          file,
-        })
-      );
-    }
-    setNewMessageText("");
-    setMessages((prev) => [
-      ...prev,
-      {
-        text: newMessageText,
-        sender: id,
+    ws.send(
+      JSON.stringify({
         recipient: selectedUserId,
-        _id: Date.now(),
-      },
-    ]);
+        text: newMessageText,
+        file,
+      })
+    );
+
     if (file) {
       axios.get("/messages/" + selectedUserId).then((res) => {
         setMessages(res.data);
       });
+    } else {
+      setNewMessageText("");
+      setMessages((prev) => [
+        ...prev,
+        {
+          text: newMessageText,
+          sender: id,
+          recipient: selectedUserId,
+          _id: Date.now(),
+        },
+      ]);
     }
   };
 

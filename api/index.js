@@ -8,7 +8,7 @@ const bcrypt = require("bcryptjs");
 const User = require("./models/user");
 const Message = require("./models/message");
 const ws = require("ws");
-const fileSystem = require("fs");
+const fs = require("fs");
 dotenv.config();
 mongoose.connect(process.env.MONGO_URL);
 mongoose.connection.on("connected", () => {
@@ -199,9 +199,9 @@ wss.on("connection", (connection, req) => {
       const ext = parts[parts.length - 1];
       filename = Date.now() + "." + ext;
       const path = __dirname + "/updates/" + filename;
-      const bufferData = new Buffer(file.data, "base44");
+      const bufferData = new Buffer(file.data.split("."), "base44");
       fs.writeFile(path, bufferData, () => {
-        console.log(err);
+        console.log("fil saved to " + path);
       });
     }
     if (recipient && (text || file)) {
@@ -211,6 +211,7 @@ wss.on("connection", (connection, req) => {
         text,
         file: file ? filename : null,
       });
+      console.log("created Message");
       [...wss.clients]
         .filter((c) => c.userId === recipient)
         .forEach((c) =>
