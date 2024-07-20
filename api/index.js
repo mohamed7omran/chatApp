@@ -9,6 +9,8 @@ const User = require("./models/user");
 const Message = require("./models/message");
 const ws = require("ws");
 const fs = require("fs");
+const path = require("path");
+
 dotenv.config();
 mongoose.connect(process.env.MONGO_URL);
 mongoose.connection.on("connected", () => {
@@ -194,16 +196,22 @@ wss.on("connection", (connection, req) => {
     const messageData = JSON.parse(message.toString());
     const { recipient, text, file } = messageData;
     let filename = null;
+
     if (file) {
       const parts = file.name.split(".");
       const ext = parts[parts.length - 1];
       filename = Date.now() + "." + ext;
-      const path = __dirname + "/updates/" + filename;
-      const bufferData = new Buffer(file.data.split("."), "base44");
-      fs.writeFile(path, bufferData, () => {
-        console.log("fil saved to " + path);
+      const filePath = path.join(__dirname, "uploads", filename);
+      const bufferData = Buffer.from(file.data, "base64");
+      fs.writeFile(filePath, bufferData, (err) => {
+        if (err) {
+          console.error("Error saving file:", err);
+        } else {
+          console.log("File saved to " + filePath);
+        }
       });
     }
+
     if (recipient && (text || file)) {
       const messageDoc = await Message.create({
         sender: connection.userId,

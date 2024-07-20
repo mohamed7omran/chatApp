@@ -92,7 +92,7 @@ const Chat = () => {
     reader.readAsDataURL(ev.target.files[0]);
     reader.onload = () => {
       sendMessage(null, {
-        name: ev.target.files[0],
+        name: ev.target.files[0].name,
         data: reader.result,
       });
     };
@@ -219,7 +219,9 @@ const Chat = () => {
                             rel="noopener noreferrer"
                             className="flex items-center gap-1 border-b"
                             href={
-                              axios.defaults.baseURL + "/uploads" + message.file
+                              axios.defaults.baseURL +
+                              "/uploads/" +
+                              message.file
                             }
                           >
                             <svg
