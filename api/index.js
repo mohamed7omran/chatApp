@@ -202,7 +202,7 @@ wss.on("connection", (connection, req) => {
       const ext = parts[parts.length - 1];
       filename = Date.now() + "." + ext;
       const filePath = path.join(__dirname, "uploads", filename);
-      const bufferData = Buffer.from(file.data, "base64");
+      const bufferData = Buffer.from(file.data.split(",")[1], "base64");
       fs.writeFile(filePath, bufferData, (err) => {
         if (err) {
           console.error("Error saving file:", err);
